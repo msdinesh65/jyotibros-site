@@ -1,8 +1,15 @@
 'use client';
 
+import { useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '../cart-context';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CartPage() {
   const { items } = useCart();
@@ -11,6 +18,70 @@ export default function CartPage() {
     const numeric = Number(item.price.replace(/[^0-9.]/g, ''));
     return sum + (Number.isNaN(numeric) ? 0 : numeric * item.quantity);
   }, 0);
+
+  const handleCheckout = useCallback(async () => {
+    if (!hasItems || total <= 0) return;
+
+    // Lazy-load Razorpay checkout script if it isn't already present
+    if (typeof window !== 'undefined' && !window.Razorpay) {
+      await new Promise<void>((resolve, reject) => {
+        const existing = document.querySelector<HTMLScriptElement>(
+          'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+        );
+        if (existing) {
+          existing.addEventListener('load', () => resolve());
+          existing.addEventListener('error', () => reject());
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
+        document.body.appendChild(script);
+      });
+    }
+
+    const amountInPaise = Math.round(total * 100);
+
+    const response = await fetch('/api/razorpay-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amountInPaise,
+        receiptId: `cart-${Date.now()}`
+      })
+    });
+
+    if (!response.ok) {
+      // In production, show a toast or message to the user
+      console.error('Failed to create Razorpay order');
+      return;
+    }
+
+    const { orderId, amount, currency } = await response.json();
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount,
+      currency,
+      name: 'Jyoti & Brothers',
+      description: 'Cart payment',
+      order_id: orderId,
+      prefill: {
+        name: '',
+        email: '',
+        contact: ''
+      },
+      theme: {
+        color: '#f97316'
+      }
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  }, [hasItems, total]);
 
   return (
     <div className="space-y-6">
@@ -67,11 +138,16 @@ export default function CartPage() {
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              This is a demo cart for Jyoti &amp; Bros. Connect it to your
-              payment gateway and backend to accept real orders.
+              You are in test mode. Razorpay checkout will use your test API
+              keys. Replace them with live keys before taking real payments.
             </p>
-            <button className="primary-button w-full" disabled>
-              Proceed to checkout (demo)
+            <button
+              type="button"
+              className="primary-button w-full"
+              onClick={handleCheckout}
+              disabled={!hasItems || total <= 0}
+            >
+              Pay securely with Razorpay
             </button>
           </aside>
         </div>
