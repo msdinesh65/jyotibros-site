@@ -191,9 +191,20 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className="
+            flex gap-4 overflow-x-auto snap-x snap-mandatory
+            sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible
+            lg:grid-cols-3
+          "
+        >
           {newArrivals.map((item) => (
-            <ProductCard key={item.id} product={item} />
+            <div
+              key={item.id}
+              className="snap-start min-w-[70%] sm:min-w-0"
+            >
+              <ProductCard product={item} />
+            </div>
           ))}
         </div>
       </section>

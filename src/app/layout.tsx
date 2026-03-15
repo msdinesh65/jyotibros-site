@@ -37,7 +37,8 @@ export default function RootLayout({
                 </div>
               </Link>
 
-              <nav className="flex items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-slate-700 flex-wrap justify-end">
+              {/* Desktop navigation */}
+              <nav className="hidden md:flex items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-slate-700 flex-wrap justify-end">
                 {/* Suits */}
                 <div className="relative group">
                   <a href="/suits" className="hover:text-brand-600 inline-flex items-center gap-1">
@@ -143,6 +144,27 @@ export default function RootLayout({
                   Track Order
                 </Link>
                 <CartStatus />
+              </div>
+            </div>
+
+            {/* Simple mobile navigation below header */}
+            <div className="md:hidden border-t border-slate-200 bg-white/90">
+              <div className="page-container py-2 flex flex-wrap gap-3 text-[13px] font-medium text-slate-700">
+                <Link href="/suits" className="hover:text-brand-600">
+                  Suits
+                </Link>
+                <Link href="/readymade-wear" className="hover:text-brand-600">
+                  Readymade Wear
+                </Link>
+                <Link href="/sarees" className="hover:text-brand-600">
+                  Sarees
+                </Link>
+                <Link href="/mens-wear" className="hover:text-brand-600">
+                  Mens Wear
+                </Link>
+                <Link href="/sale" className="text-rose-600 hover:text-rose-700">
+                  Sales
+                </Link>
               </div>
             </div>
           </header>
