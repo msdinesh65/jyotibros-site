@@ -7,6 +7,14 @@
   --foreground: 15 23 42;
 }
 
+/* Prevent inline SVGs from expanding to arbitrary size in flex layouts */
+header svg {
+  display: block;
+  flex-shrink: 0;
+  max-width: 2.5rem;
+  max-height: 2.5rem;
+}
+
 body {
   @apply text-[15px] sm:text-[16px] text-slate-900 antialiased;
   /* Very soft, pastel animated background so content stays readable */

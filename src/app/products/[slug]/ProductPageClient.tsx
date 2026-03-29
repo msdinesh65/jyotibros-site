@@ -10,6 +10,11 @@ type Props = {
   activeColorId?: string;
 };
 
+function computeDiscountPercent(price: number, original?: number) {
+  if (!original || original <= price) return undefined;
+  return Math.round((1 - price / original) * 100);
+}
+
 export function ProductPageClient({ product, activeColorId }: Props) {
   const { addToCart } = useCart();
 
@@ -26,6 +31,12 @@ export function ProductPageClient({ product, activeColorId }: Props) {
         activeVariant?.label ? ` – ${activeVariant.label}` : ''
       }`,
       price: `₹${product.price.toLocaleString('en-IN')}`,
+      unitPrice: product.price,
+      originalPrice: product.originalPrice,
+      discountPercent: computeDiscountPercent(
+        product.price,
+        product.originalPrice
+      ),
       image: activeVariant?.image ?? product.variants[0]?.image
     });
   };

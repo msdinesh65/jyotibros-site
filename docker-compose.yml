@@ -1,0 +1,21 @@
+# Local PostgreSQL for development (COD & online orders).
+# Usage:
+#   docker compose up -d
+#   cp .env.example .env.local   # then set DATABASE_URL + Razorpay keys
+#   npx prisma migrate deploy
+#   npm run dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: jyoti
+      POSTGRES_PASSWORD: jyoti_dev
+      POSTGRES_DB: jyotibros
+    volumes:
+      - jyotibros_pgdata:/var/lib/postgresql/data
+
+volumes:
+  jyotibros_pgdata:

@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  savedAddress SavedAddress?
+  orders       Order[]
+}
+
+/// Default delivery address for repeat checkout (one per account).
+model SavedAddress {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+  updatedAt       DateTime @updatedAt
+}
+
+enum OrderStatus {
+  pending_payment
+  confirmed
+  shipped
+  cancelled
+}
+
+enum PaymentMethod {
+  cod
+  razorpay
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status        OrderStatus
+  paymentMethod PaymentMethod
+
+  /// Sum of line sale amounts (paise)
+  subtotalPaise      Int
+  /// MRP total minus sale total (paise), for display/analytics
+  discountTotalPaise Int
+  /// Amount customer pays (paise) — same as subtotal for this catalog
+  totalPaise         Int
+
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+
+  customerName  String
+  customerEmail String
+  customerPhone String
+
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productSlug String
+  name        String
+  image       String?
+
+  quantity Int
+
+  unitPricePaise       Int
+  originalPricePaise   Int?
+  discountPercent      Int?
+}

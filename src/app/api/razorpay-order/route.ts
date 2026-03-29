@@ -1,20 +1,25 @@
 import Razorpay from 'razorpay';
 import { NextRequest, NextResponse } from 'next/server';
 
-const key_id = process.env.RAZORPAY_KEY_ID;
-const key_secret = process.env.RAZORPAY_KEY_SECRET;
-
-if (!key_id || !key_secret) {
-  // In production you may want to log this; throwing ensures we don't create invalid orders.
-  throw new Error('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set');
+function getRazorpay(): Razorpay | null {
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!key_id || !key_secret) return null;
+  return new Razorpay({ key_id, key_secret });
 }
 
-const razorpay = new Razorpay({
-  key_id,
-  key_secret
-});
-
 export async function POST(req: NextRequest) {
+  const razorpay = getRazorpay();
+  if (!razorpay) {
+    return NextResponse.json(
+      {
+        error:
+          'Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.local (see .env.example).'
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     const body = await req.json();
     const amountInPaise: number = body.amountInPaise;
@@ -48,4 +53,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

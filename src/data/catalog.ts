@@ -58,7 +58,7 @@ export const catalog: Product[] = [
         label: "Ruby Maroon",
         colorDotClass: "bg-rose-700",
         image: "/images/ruby-maroon.jpg",
-        stock: 0
+        stock: 5
       }
     ]
   },
@@ -120,7 +120,7 @@ export const catalog: Product[] = [
         label: "Dusty Sky",
         colorDotClass: "bg-sky-300",
         image: "/images/dusty-sky.jpg",
-        stock: 0
+        stock: 5
       }
     ]
   },
